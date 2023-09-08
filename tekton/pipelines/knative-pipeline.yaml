@@ -35,11 +35,14 @@ spec:
   - name: dockerfile
     type: string
     description: Dockerfile location used to build the final image
+  - name: STORAGE_DRIVER            
+    type: string
   workspaces:
   - name: source
   - name: maven-settings
   - name: knative-kustomize-base
   - name: knative-kustomize-environment
+  - name: files
   tasks:
   - name: fetch-source-repository
     taskRef:
@@ -74,8 +77,7 @@ spec:
   - name: image-build-and-push
     taskRef:
       name: buildah
-# use task taken from hub (so no pipeline resource is needed...)
-#      kind: ClusterTask
+      kind: Task
     params:
       - name: TLSVERIFY
         value: "false"
@@ -85,9 +87,13 @@ spec:
         value: $(workspaces.source.path)/$(params.source-revision)
       - name: DOCKERFILE
         value: $(params.dockerfile)
+      - name: STORAGE_DRIVER            
+        value: $(params.STORAGE_DRIVER)
     workspaces: 
       - name: source 
         workspace: source 
+      - name: files
+        workspace: files
     runAfter:
       - maven-build-and-test
   - name: fetch-deployment-repository
@@ -99,7 +105,7 @@ spec:
       workspace: source
     params:
     - name: url
-      value: $(params.deployment-repo-url)
+      value: "https://$(params.deployment-repo-url)"
     - name: revision
       value: $(params.deployment-revision)
     - name: subdirectory
@@ -108,6 +114,7 @@ spec:
       value: "true"
     runAfter:
       - image-build-and-push
+      - push-knative-manifest 
   - name: push-knative-manifest 
     taskRef:
       name: push-knative-manifest
@@ -133,10 +140,12 @@ spec:
       value: $(params.image-registry)
     - name: image-repository
       value: $(params.image-repository)
+    - name: url
+      value: $(params.deployment-repo-url)
+    - name: revision
+      value: $(params.deployment-revision)
     runAfter:
-      - fetch-deployment-repository   
-  # finally clause is added in 0.14.. we are currently using 0.11
-  # workaround, just for those success pipelines, remove directory
+#      - fetch-deployment-repository   
   finally:  
     - name: cleanup-source-workspace
       taskRef:

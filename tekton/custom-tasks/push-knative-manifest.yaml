@@ -38,7 +38,39 @@ spec:
     - name: image-repository
       type: string
       description: Image repository within image-registry. Used for set image in manifests
+    - name: url
+      type: string
+    - name: revision
+      type: string
   steps:
+    - name: clone-git-repository
+      image: quay.io/dsanchor/ubi8-git:0.0.2
+      env:
+        - name: GITHOSTACCESSTOKEN
+          valueFrom:
+            secretKeyRef:
+              key: "token"
+              name: "github-access-token"
+      script: |
+        #!/bin/sh
+        set -eu -o pipefail
+
+        DEPLOYMENT_DIR="$(workspaces.source.path)/$(params.deployment-subdirectory)"
+
+        if [ ! -d "$DEPLOYMENT_DIR" ]
+        then
+          echo "$DEPLOYMENT_DIR does not exists, it will be created"
+          mkdir -p $DEPLOYMENT_DIR
+        else
+          echo "$DEPLOYMENT_DIR already exists, no need to create it"
+        fi
+
+        cd $DEPLOYMENT_DIR
+
+        git clone https://${GITHOSTACCESSTOKEN}@$(params.url)
+
+        ls -al
+
     - name: create-kustomize-base-manifests
       image: quay.io/dsanchor/ubi8-git:0.0.2
       script: |
@@ -233,17 +265,31 @@ spec:
 
     - name: push-manifest-to-git
       image: quay.io/dsanchor/ubi8-git:0.0.2
+      env:
+        - name: GITHOSTACCESSTOKEN
+          valueFrom:
+            secretKeyRef:
+              key: "token"
+              name: "github-access-token"
       script: |
         #!/bin/sh
         set -eu -o pipefail
 
         DEPLOYMENT_DIR="$(workspaces.source.path)/$(params.deployment-subdirectory)"
+
+        echo $DEPLOYMENT_DIR
+
         cd $DEPLOYMENT_DIR
+
+        ls -al
 
         git config --global user.email "bot@tekton-pipelines.dev"
         git config --global user.name "tekton-pipelines-bot"
      
+        git status
         git add --a -v 
+        git status
         git commit -m "New knative manifests for commit $(params.source-commit-id) of application $(params.application)"
+        git status
         # FIXME master harcoded
-        git push origin HEAD:master
+        git push origin HEAD:main
