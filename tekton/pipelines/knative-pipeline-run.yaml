@@ -16,7 +16,7 @@ spec:
       value: "650db0"
     - name: deployment-repo-url
       value: github.com/marrober/quarkus-hello-world-deployment.git
-    - name: github-repo-name
+    - name: github-repo-name 
       value: quarkus-hello-world-deployment
     - name: deployment-revision
       value: "main"
@@ -30,8 +30,15 @@ spec:
       value: vfs
   workspaces:
   - name: source
-    persistentvolumeclaim:
-      claimName: source-pvc 
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+#    persistentvolumeclaim:
+#      claimName: source-pvc 
   - name: maven-settings
     configMap: 
        name: maven

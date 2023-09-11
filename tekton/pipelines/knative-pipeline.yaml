@@ -37,6 +37,8 @@ spec:
     description: Dockerfile location used to build the final image
   - name: STORAGE_DRIVER            
     type: string
+  - name: github-repo-name
+    type: string
   workspaces:
   - name: source
   - name: maven-settings
@@ -96,25 +98,25 @@ spec:
         workspace: files
     runAfter:
       - maven-build-and-test
-  - name: fetch-deployment-repository
-    taskRef:
-      name: git-clone
-      kind: ClusterTask
-    workspaces:
-    - name: output
-      workspace: source
-    params:
-    - name: url
-      value: "https://$(params.deployment-repo-url)"
-    - name: revision
-      value: $(params.deployment-revision)
-    - name: subdirectory
-      value: $(params.source-revision)-deployment
-    - name: deleteExisting
-      value: "true"
-    runAfter:
-      - image-build-and-push
-      - push-knative-manifest 
+# - name: fetch-deployment-repository
+#    taskRef:
+#      name: git-clone
+#      kind: ClusterTask
+#    workspaces:
+#    - name: output
+#      workspace: source
+#    params:
+#    - name: url
+#      value: "https://$(params.deployment-repo-url)"
+#    - name: revision
+#      value: $(params.deployment-revision)
+#    - name: subdirectory
+#      value: $(params.source-revision)-deployment
+#    - name: deleteExisting
+#      value: "true"
+#    runAfter:
+#      - image-build-and-push
+#      - push-knative-manifest 
   - name: push-knative-manifest 
     taskRef:
       name: push-knative-manifest
@@ -144,24 +146,26 @@ spec:
       value: $(params.deployment-repo-url)
     - name: revision
       value: $(params.deployment-revision)
+    - name: github-repo-name
+      value: $(params.github-repo-name)
     runAfter:
-#      - fetch-deployment-repository   
-  finally:  
-    - name: cleanup-source-workspace
-      taskRef:
-        name: workspace-cleaner
-      workspaces:
-        - name: root-workspace
-          workspace: source
-      params:
-        - name: directory
-          value: $(params.source-revision)
-    - name: cleanup-deployment-workspace
-      taskRef:
-        name: workspace-cleaner
-      workspaces:
-        - name: root-workspace
-          workspace: source
-      params:
-        - name: directory
-          value: $(params.source-revision)-deployment
+      - image-build-and-push 
+#  finally:  
+#    - name: cleanup-source-workspace
+#      taskRef:
+#        name: workspace-cleaner
+#      workspaces:
+#        - name: root-workspace
+#          workspace: source
+#      params:
+#        - name: directory
+#          value: $(params.source-revision)
+#    - name: cleanup-deployment-workspace
+#      taskRef:
+#        name: workspace-cleaner
+#      workspaces:
+#        - name: root-workspace
+#          workspace: source
+#      params:
+#        - name: directory
+#          value: $(params.source-revision)-deployment
