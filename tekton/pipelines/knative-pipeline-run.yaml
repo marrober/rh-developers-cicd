@@ -11,9 +11,9 @@ spec:
     - name: source-repo-url
       value: https://github.com/marrober/quarkus-hello-world.git
     - name: source-revision
-      value: 650db0168651612c9fc81a4011b9d1d29d638deb
+      value: main
     - name: short-source-revision
-      value: "650db0"
+      value: "main"
     - name: deployment-repo-url
       value: github.com/marrober/quarkus-hello-world-deployment.git
     - name: github-repo-name 

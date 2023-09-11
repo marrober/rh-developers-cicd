@@ -133,7 +133,7 @@ spec:
     - name: source-commit-id
       value: $(params.source-revision)
     - name: short-source-commit-id
-      value: $(params.short-source-revision)
+      value: $(tasks.fetch-source-repository.results.commit)
     - name: source-subdirectory
       value: $(params.source-revision)
     - name: deployment-subdirectory

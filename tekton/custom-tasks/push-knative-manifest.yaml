@@ -134,8 +134,14 @@ spec:
 
         SOURCE_DIR="$(workspaces.source.path)/$(params.source-subdirectory)"
         DEPLOYMENT_DIR="$(workspaces.source.path)/$(params.deployment-subdirectory)/$(params.github-repo-name)"
-        # add r as prefix (to denote revision)
-        REVISION=r$(params.short-source-commit-id)  
+
+        commitID=$(params.short-source-commit-id)
+
+        shortCommitID=${commitID:0:6}
+
+        echo $shortCommitID
+
+        REVISION=r-$shortCommitID  
 
         TEMPLATES_DIR="$(workspaces.knative-kustomize-environment.path)"
 
