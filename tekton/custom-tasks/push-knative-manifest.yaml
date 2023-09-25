@@ -170,14 +170,14 @@ spec:
           ENV_DEPLOYMENT_DIR="$DEPLOYMENT_DIR/$env"
           ENV_TR_FILE="$ENV_DEPLOYMENT_DIR/traffic-routing.yaml"
           # Check if env traffic-routing.yaml exists 
-          if [ ! -f "$ENV_TR_FILE" ]
-          then
-            echo "$ENV_TR_FILE does not exists, it will be initialized"
+          # if [ ! -f "$ENV_TR_FILE" ]
+          # then
+          #   echo "$ENV_TR_FILE does not exists, it will be initialized"
             cat $TEMPLATES_DIR/traffic-routing.yaml | APPLICATION_NAME=$(params.application) \
               REVISION=$REVISION envsubst > $ENV_TR_FILE          
-          else
-            echo "Keeping existing $ENV_TR_FILE"
-          fi    
+          # else
+          #   echo "Keeping existing $ENV_TR_FILE"
+          # fi    
         }
 
         init_service_traffic_routing development
