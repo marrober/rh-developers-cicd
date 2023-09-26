@@ -5,4 +5,4 @@
 - op: add
   path: /spec/template/spec/containers/0/image
   value:
-    ${IMAGE_REGISTRY}/${IMAGE_REPOSITORY}/${APPLICATION_NAME}:${IMAGE_TAG}
+    image-registry.openshift-image-registry.svc.cluster.local:5000/cicd/my-serverless:main
